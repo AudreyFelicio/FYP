@@ -11,6 +11,7 @@ auto fast_io() -> void {
 auto main() -> int {
   int n, k;
   std::cin >> n >> k;
+  std::cout << n << " " << k << "\n";
 
   std::vector<int> permutation(n, 0);
   std::iota(permutation.begin(), permutation.end(), 1);
