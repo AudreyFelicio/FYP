@@ -9,18 +9,18 @@ auto fast_io() -> void {
   std::cin.tie(nullptr);
 }
 
-auto compute_lcs(const std::vector<int>& mapping, const std::vector<int>& data) -> uint64_t {
+auto compute_ulam(const std::vector<int>& mapping, const std::vector<int>& data) -> uint64_t {
   std::vector<int> lcs;
   for (const auto x : data) {
     int mapped = mapping[x];
     auto it = std::lower_bound(lcs.begin(), lcs.end(), mapped);
     if (it == lcs.end()) {
-      lcs.push_back(x);
+      lcs.push_back(mapped);
     } else {
-      *it = x;
+      *it = mapped;
     }
   }
-  return lcs.size();
+  return data.size() - lcs.size();
 }
 
 auto main() -> int {
@@ -47,7 +47,7 @@ auto main() -> int {
     }
     uint64_t total_distance = 0ULL;
     for (const auto& data : datasets) {
-      total_distance += compute_lcs(mapping, data);
+      total_distance += compute_ulam(mapping, data);
     }
     if (total_distance < global_min) {
       global_min = total_distance;
