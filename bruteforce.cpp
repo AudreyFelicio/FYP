@@ -36,6 +36,7 @@ auto main() -> int {
     }
   }
 
+  std::vector<int> global_permutation(n, 0);
   std::vector<int> permutation(n, 0);
   std::iota(permutation.begin(), permutation.end(), 1);
   std::vector<int> mapping(n + 1, 0);
@@ -48,7 +49,15 @@ auto main() -> int {
     for (const auto& data : datasets) {
       total_distance += compute_lcs(mapping, data);
     }
-    global_min = std::min(total_distance, global_min);
+    if (total_distance < global_min) {
+      global_min = total_distance;
+      global_permutation = permutation;
+    }
   } while (std::next_permutation(permutation.begin(), permutation.end()));
+
   std::cout << global_min << std::endl;
+  for (const auto p : global_permutation) {
+    std::cout << p << " ";
+  }
+  std::cout << std::endl;
 }
