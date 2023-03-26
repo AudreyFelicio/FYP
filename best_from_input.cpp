@@ -3,13 +3,8 @@
 
 #include "utils.hpp"
 
-auto fast_io() -> void {
-  std::ios::sync_with_stdio(false);
-  std::cin.tie(nullptr);
-}
-
 auto main() -> int {
-  fast_io();
+  utils::fast_io();
 
   int n, k;
   const auto datasets = utils::read_input(n, k);

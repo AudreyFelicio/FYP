@@ -3,12 +3,11 @@
 #include <random>
 #include <iostream>
 
-auto fast_io() -> void {
-  std::ios::sync_with_stdio(false);
-  std::cin.tie(nullptr);
-}
+#include "utils.hpp"
 
 auto main() -> int {
+  utils::fast_io();
+
   int n, k;
   std::cin >> n >> k;
   std::cout << n << " " << k << "\n";
@@ -20,10 +19,7 @@ auto main() -> int {
 
   for (auto i = 0; i < k; ++i) {
     shuffle(permutation.begin(), permutation.end(), g);
-    for (auto p : permutation) {
-      std::cout << p << " ";
-    }
-    std::cout << "\n";
+    utils::print_vector<>(permutation);
   }
   std::cout.flush();
 }
