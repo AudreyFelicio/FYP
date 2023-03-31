@@ -4,7 +4,10 @@ CXX = g++
 CFLAGS := $(CFLAGS) -O3 -Wall -Wextra -pedantic -Werror -std=c18 -pthread
 CXXFLAGS := $(CXXFLAGS) -O3 -Wall -Wextra -pedantic -Werror -std=c++20 -pthread
 
-all: bruteforce best_input relative_order approx_median
+all: generator bruteforce best_input relative_order approx_median
+
+generator:
+	$(CXX) $(CXXFLAGS) -o build/generator generator.cpp
 
 bruteforce:
 	$(CXX) $(CXXFLAGS) -o build/bruteforce bruteforce.cpp
