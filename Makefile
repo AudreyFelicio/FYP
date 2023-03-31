@@ -18,6 +18,9 @@ relative_order:
 approx_median:
 	$(CXX) $(CXXFLAGS) -o build/approx approx_median.cpp
 
+naive_local_search:
+	$(CXX) $(CXXFLAGS) -o build/naive_local naive_local_search.cpp
+
 .PHONY: clean
 clean:
 	rm -f *.o build/*

@@ -2,6 +2,7 @@
 #include <chrono>
 #include <algorithm>
 #include <random>
+#include <thread>
 
 #include "utils.hpp"
 
@@ -46,7 +47,12 @@ auto pick_best_2_swap(
 }
 
 template<typename T>
-auto local_search(const std::vector<std::vector<int>> datasets, const int n, const std::chrono::time_point<T>& deadline) -> void {
+auto local_search(
+  const std::vector<std::vector<int>> datasets, 
+  const int n, 
+  const std::chrono::time_point<T>& deadline,
+  std::pair<std::vector<int>, uint64_t>& output
+) -> void {
   std::vector<int> permutation(n, 0);
   std::iota(permutation.begin(), permutation.end(), 1);
   std::random_device rd;
@@ -62,10 +68,8 @@ auto local_search(const std::vector<std::vector<int>> datasets, const int n, con
   }
 
   size_t iterations = 0;
-  std::chrono::milliseconds totalTime(0);   // Total time spent in main loop.
-  std::chrono::milliseconds averageTime(0); // Average main loop iteration time.
-
   while (now() < deadline) {
+    iterations++;
     const auto [i, j, new_best] = pick_best_2_swap(datasets, n, permutation, total_distance);
     if (new_best >= total_distance) {
       break;
@@ -73,8 +77,8 @@ auto local_search(const std::vector<std::vector<int>> datasets, const int n, con
     std::swap(permutation[i], permutation[j]);
   }
 
-  std::cout << total_distance << std::endl;
-  utils::print_vector<int>(permutation);
+  LOG("Number of iterations " << iterations);
+  output = { permutation, total_distance };
 }
 
 auto main() -> int {
@@ -83,5 +87,22 @@ auto main() -> int {
   int n, k;
   const auto datasets = utils::read_input(n, k);
 
-  local_search(datasets, n, now() + std::chrono::milliseconds(2'000));
+  const auto processor_count = static_cast<int>(std::thread::hardware_concurrency());
+
+  std::vector<std::thread> local_searches;
+  std::vector<std::pair<std::vector<int>, uint64_t>> outputs(processor_count);
+  for (auto i = 0; i < processor_count; ++i) {
+    local_searches.emplace_back(
+      std::thread(local_search<std::chrono::high_resolution_clock>, datasets, n, now() + std::chrono::milliseconds(10'000), std::ref(outputs[i]))
+    );
+  }
+  for (auto i = 0; i < processor_count; ++i) {
+    local_searches[i].join();
+  }
+
+  const auto [best_permutation, best_distance] = *std::min_element(outputs.begin(), outputs.end(), [](const auto& p1, const auto& p2) -> bool {
+    return p1.second < p2.second;
+  });
+  std::cout << best_distance << std::endl;
+  utils::print_vector<int>(best_permutation);
 }
