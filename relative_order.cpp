@@ -1,8 +1,9 @@
 #include <vector>
 
 #include "utils.hpp"
+#include "best_from_input.hpp"
 
-auto relative_order(const std::vector<std::vector<int>> datasets, const double alpha, const int n) -> void {
+auto relative_order(const std::vector<std::vector<int>> datasets, const double alpha, const int n) -> std::pair<std::vector<int>, uint64_t> {
   // Build graph H
   std::vector<bool> is_removed(n + 1, false);
   std::vector<std::vector<int>> adjacency_list(n + 1, std::vector<int>{});
@@ -62,8 +63,7 @@ auto relative_order(const std::vector<std::vector<int>> datasets, const double a
     total_distance += utils::compute_ulam(mapping, data);
   }
 
-  std::cout << total_distance << std::endl;
-  utils::print_vector<int>(permutation);
+  return { permutation, total_distance };
 }
 
 auto main() -> int {
@@ -72,5 +72,13 @@ auto main() -> int {
   int n, k;
   const auto datasets = utils::read_input(n, k);
 
-  relative_order(datasets, 0.1, n);
+  const auto [relative_permutation, relative_distance] = relative_order(datasets, 0.1, n);
+  const auto [best_permutation, best_distance] = algo::best_from_input(datasets, n);
+  if (relative_distance <= best_distance) {
+    std::cout << relative_distance << std::endl;
+    utils::print_vector<int>(relative_permutation);
+  } else {
+    std::cout << best_distance << std::endl;
+    utils::print_vector<int>(best_permutation);
+  }
 }
