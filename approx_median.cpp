@@ -1,8 +1,10 @@
 #include <vector>
+#include <climits>
 
 #include "utils.hpp"
+#include "best_from_input.hpp"
 
-auto relative_order(const std::vector<std::vector<int>> datasets, const double alpha, const int n) -> void {
+auto median_reconstruct(const std::vector<std::vector<int>>& datasets, const int n) -> std::vector<int> {
   // Build graph H
   std::vector<bool> is_removed(n + 1, false);
   std::vector<std::vector<int>> adjacency_list(n + 1, std::vector<int>{});
@@ -22,7 +24,7 @@ auto relative_order(const std::vector<std::vector<int>> datasets, const double a
       }
     }
     for (int j = 1; j <= n; ++j) {
-      if (frequency[j] >= (1.0 - 2 * alpha) * static_cast<double>(datasets.size())) {
+      if (frequency[j] >= 3) {
         adjacency_list[i].push_back(j);
       }
     }
@@ -51,19 +53,45 @@ auto relative_order(const std::vector<std::vector<int>> datasets, const double a
   for (int i = 1; i <= n; ++i) {
     if (is_removed[i]) permutation.push_back(i);
   }
+  return permutation;
+}
 
-  // Compute distance to dataset
+auto approx_median(const std::vector<std::vector<int>> datasets, const int n) -> void {
+  std::vector<std::vector<int>> optimal_candidates = { algo::best_from_input(datasets, n).first };
+
+  const auto m = datasets.size();
+  for (int i = 0; i < m; ++i) {
+    for (int j = i + 1; j < m; ++j) {
+      for (int k = j + 1; k < m; ++k) {
+        for (int l = k + 1; l < m; ++l) {
+          for (int x = l + 1; x < m; ++x) {
+            const auto subset = { datasets[i], datasets[j], datasets[k], datasets[l], datasets[x] };
+            optimal_candidates.push_back(move(median_reconstruct(subset, n)));
+          }
+        }
+      }
+    }
+  }
+
+  uint64_t global_min = ULLONG_MAX;
   std::vector<int> mapping(n + 1, 0);
-  for (auto i = 0; i < n; ++i) {
-    mapping[permutation[i]] = i + 1;
-  }
-  uint64_t total_distance = 0ULL;
-  for (const auto& data : datasets) {
-    total_distance += utils::compute_ulam(mapping, data);
+  std::vector<int> result;
+  for (const auto& permutation : optimal_candidates) {
+    for (auto i = 0; i < n; ++i) {
+      mapping[permutation[i]] = i + 1;
+    }
+    uint64_t total_distance = 0ULL;
+    for (const auto& data : datasets) {
+      total_distance += utils::compute_ulam(mapping, data);
+    }
+    if (total_distance < global_min) {
+      global_min = total_distance;
+      result = permutation;
+    }
   }
 
-  std::cout << total_distance << std::endl;
-  utils::print_vector<int>(permutation);
+  std::cout << global_min << std::endl;
+  utils::print_vector<int>(result);
 }
 
 auto main() -> int {
@@ -72,5 +100,5 @@ auto main() -> int {
   int n, k;
   const auto datasets = utils::read_input(n, k);
 
-  relative_order(datasets, 0.1, n);
+  approx_median(datasets, n);
 }
