@@ -91,7 +91,7 @@ auto read_input(int& n, int& k) -> std::vector<std::vector<int>> {
     }
   }
 
-  return move(datasets);
+  return datasets;
 }
 
 template<typename T>
@@ -102,6 +102,6 @@ auto print_vector(const std::vector<T>& vec) {
   std::cout << std::endl;
 }
 
-};
+}; // namespace utils
 
 #endif // __UTILS_HPP__

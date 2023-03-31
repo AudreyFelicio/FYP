@@ -59,7 +59,7 @@ auto median_reconstruct(const std::vector<std::vector<int>>& datasets, const int
 auto approx_median(const std::vector<std::vector<int>> datasets, const int n) -> void {
   std::vector<std::vector<int>> optimal_candidates = { algo::best_from_input(datasets, n).first };
 
-  const auto m = datasets.size();
+  const auto m = static_cast<int>(datasets.size());
   for (int i = 0; i < m; ++i) {
     for (int j = i + 1; j < m; ++j) {
       for (int k = j + 1; k < m; ++k) {
