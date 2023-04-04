@@ -4,7 +4,7 @@ CXX = g++
 CFLAGS := $(CFLAGS) -O3 -Wall -Wextra -pedantic -Werror -std=c18 -pthread
 CXXFLAGS := $(CXXFLAGS) -O3 -Wall -Wextra -pedantic -Werror -std=c++20 -pthread
 
-all: generator bruteforce best_input relative_order approx_median naive_local_search iterated_local_search
+all: generator bruteforce best_input relative_order approx_median naive_local_search iterated_local_search tabu_search
 
 generator:
 	$(CXX) $(CXXFLAGS) -o build/generator generator.cpp
@@ -26,6 +26,9 @@ naive_local_search:
 
 iterated_local_search:
 	$(CXX) $(CXXFLAGS) -o build/iterated_local iterated_local_search.cpp
+
+tabu_search:
+	$(CXX) $(CXXFLAGS) -o build/tabu_search tabu_search.cpp
 
 .PHONY: clean
 clean:
