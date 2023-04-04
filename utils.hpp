@@ -76,6 +76,22 @@ auto compute_ulam(const std::vector<int>& mapping, const std::vector<int>& data)
   return data.size() - lcs.size();
 }
 
+auto compute_distance(
+  const std::vector<std::vector<int>>& datasets, 
+  const std::vector<int>& permutation,
+  const int n
+) -> std::pair<std::vector<int>, uint64_t> {
+  std::vector<int> mapping(n + 1, 0);
+  for (int i = 0; i < n; ++i) {
+    mapping[permutation[i]] = i + 1;
+  }
+  uint64_t total_distance = 0ULL;
+  for (const auto& data : datasets) {
+    total_distance += compute_ulam(mapping, data);
+  }
+  return { mapping, total_distance };
+}
+
 auto fast_io() -> void {
   std::ios::sync_with_stdio(false);
   std::cin.tie(nullptr);

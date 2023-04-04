@@ -13,6 +13,7 @@
   #define LOG(x)
 #endif
 
+const int subsidiary_deadline_in_ms = 2'000;
 const int deadline_in_ms = 60'000;
 
 static inline std::chrono::time_point<std::chrono::high_resolution_clock> now() {
@@ -50,7 +51,7 @@ auto pick_best_2_swap(
 }
 
 template<typename T>
-auto local_search_best_input(
+auto local_search(
   const std::vector<std::vector<int>> datasets, 
   const int n, 
   const std::chrono::time_point<T> deadline,
@@ -58,39 +59,12 @@ auto local_search_best_input(
 ) -> void {
   std::vector<int> permutation = algo::best_from_input(datasets, n).first;
   auto [mapping, total_distance] = utils::compute_distance(datasets, permutation, n);
-
-  size_t iterations = 0;
-  while (now() < deadline) {
-    iterations++;
-    const auto [i, j, new_best] = pick_best_2_swap(datasets, n, permutation, total_distance);
-    if (new_best >= total_distance) {
-      break;
-    }
-    total_distance = new_best;
-    std::swap(permutation[i], permutation[j]);
-  }
-
-  LOG("Number of iterations " << iterations);
-  output = { permutation, total_distance };
-}
-
-template<typename T>
-auto local_search(
-  const std::vector<std::vector<int>> datasets, 
-  const int n, 
-  const std::chrono::time_point<T> deadline,
-  std::pair<std::vector<int>, uint64_t>& output
-) -> void {
-  std::vector<int> permutation(n, 0);
-  std::iota(permutation.begin(), permutation.end(), 1);
   std::random_device rd;
   std::mt19937 rng(rd());
-  shuffle(permutation.begin(), permutation.end(), rng);
-  auto [mapping, total_distance] = utils::compute_distance(datasets, permutation, n);
+  std::uniform_int_distribution<std::mt19937::result_type> rand_int(1, n);
 
-  size_t iterations = 0;
-  while (now() < deadline) {
-    iterations++;
+  auto subsidiary_deadline = now() + std::chrono::milliseconds(subsidiary_deadline_in_ms);
+  while (now() < subsidiary_deadline) {
     const auto [i, j, new_best] = pick_best_2_swap(datasets, n, permutation, total_distance);
     if (new_best >= total_distance) {
       break;
@@ -99,7 +73,34 @@ auto local_search(
     std::swap(permutation[i], permutation[j]);
   }
 
-  LOG("Number of iterations " << iterations);
+  size_t subsidiary_local_searches = 1;
+  while (now() < deadline) {
+    subsidiary_local_searches++;
+    subsidiary_deadline = now() + std::chrono::milliseconds(subsidiary_deadline_in_ms);
+
+    // Do a pertubation, by doing 2 random swaps mimicing 4-exchange in TSP
+    std::vector<int> local_permutation = permutation;
+    std::swap(local_permutation[rand_int(rng)], local_permutation[rand_int(rng)]);
+    std::swap(local_permutation[rand_int(rng)], local_permutation[rand_int(rng)]);
+    auto [local_mapping, local_total_distance] = utils::compute_distance(datasets, local_permutation, n);
+
+    // Do a subsidiary local search
+    while (now() < subsidiary_deadline) {
+      const auto [i, j, new_best] = pick_best_2_swap(datasets, n, local_permutation, local_total_distance);
+      if (new_best >= local_total_distance) {
+        break;
+      }
+      local_total_distance = new_best;
+      std::swap(local_permutation[i], local_permutation[j]);
+    }
+
+    if (local_total_distance < total_distance) {
+      permutation = local_permutation;
+      total_distance = local_total_distance;
+    }
+  }
+
+  LOG("Number of subsidiary local searches " << subsidiary_local_searches);
   output = { permutation, total_distance };
 }
 
@@ -113,10 +114,7 @@ auto main() -> int {
 
   std::vector<std::thread> local_searches;
   std::vector<std::pair<std::vector<int>, uint64_t>> outputs(processor_count);
-  local_searches.emplace_back(
-    std::thread(local_search_best_input<std::chrono::high_resolution_clock>, datasets, n, now() + std::chrono::milliseconds(deadline_in_ms), std::ref(outputs[0]))
-  );
-  for (auto i = 1; i < processor_count; ++i) {
+  for (auto i = 0; i < processor_count; ++i) {
     local_searches.emplace_back(
       std::thread(local_search<std::chrono::high_resolution_clock>, datasets, n, now() + std::chrono::milliseconds(deadline_in_ms), std::ref(outputs[i]))
     );
