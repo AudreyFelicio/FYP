@@ -5,6 +5,7 @@
 #include <thread>
 
 #include "utils.hpp"
+#include "best_from_input.hpp"
 
 #ifdef DEBUG
   #define LOG(x) std::cerr << x << std::endl
@@ -47,6 +48,38 @@ auto pick_best_2_swap(
 }
 
 template<typename T>
+auto local_search_best_input(
+  const std::vector<std::vector<int>> datasets, 
+  const int n, 
+  const std::chrono::time_point<T>& deadline,
+  std::pair<std::vector<int>, uint64_t>& output
+) -> void {
+  std::vector<int> permutation = algo::best_from_input(datasets, n).first;
+  std::vector<int> mapping(n + 1, 0);
+  for (auto i = 0; i < n; ++i) {
+    mapping[permutation[i]] = i + 1;
+  }
+  uint64_t total_distance = 0ULL;
+  for (const auto& data : datasets) {
+    total_distance += utils::compute_ulam(mapping, data);
+  }
+
+  size_t iterations = 0;
+  while (now() < deadline) {
+    iterations++;
+    const auto [i, j, new_best] = pick_best_2_swap(datasets, n, permutation, total_distance);
+    if (new_best >= total_distance) {
+      break;
+    }
+    total_distance = new_best;
+    std::swap(permutation[i], permutation[j]);
+  }
+
+  LOG("Number of iterations " << iterations);
+  output = { permutation, total_distance };
+}
+
+template<typename T>
 auto local_search(
   const std::vector<std::vector<int>> datasets, 
   const int n, 
@@ -74,6 +107,7 @@ auto local_search(
     if (new_best >= total_distance) {
       break;
     }
+    total_distance = new_best;
     std::swap(permutation[i], permutation[j]);
   }
 
@@ -88,12 +122,16 @@ auto main() -> int {
   const auto datasets = utils::read_input(n, k);
 
   const auto processor_count = static_cast<int>(std::thread::hardware_concurrency());
+  const int deadline_in_ms = 10'000;
 
   std::vector<std::thread> local_searches;
   std::vector<std::pair<std::vector<int>, uint64_t>> outputs(processor_count);
-  for (auto i = 0; i < processor_count; ++i) {
+  local_searches.emplace_back(
+    std::thread(local_search_best_input<std::chrono::high_resolution_clock>, datasets, n, now() + std::chrono::milliseconds(deadline_in_ms), std::ref(outputs[0]))
+  );
+  for (auto i = 1; i < processor_count; ++i) {
     local_searches.emplace_back(
-      std::thread(local_search<std::chrono::high_resolution_clock>, datasets, n, now() + std::chrono::milliseconds(10'000), std::ref(outputs[i]))
+      std::thread(local_search<std::chrono::high_resolution_clock>, datasets, n, now() + std::chrono::milliseconds(deadline_in_ms), std::ref(outputs[i]))
     );
   }
   for (auto i = 0; i < processor_count; ++i) {
