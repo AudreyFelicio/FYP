@@ -1,0 +1,76 @@
+\chapter{Introduction and Literature Review}
+\label{Introduction}
+Finding a representative for a given dataset is one of the most common aggregation tasks in the field of data analysis. Two of the most popular representative would be the median and the center. Finding such representatives under certain metrics proved to have a lot of applications in other fields of Computer Science and even other science disciplines such as Biology \cite{ApproximateStringMatching, StringTreeSequence}.
+
+One of the most well-known metrics is the Edit metric (\ref{Edit Metric}) because it finds vital applications in Biology such as finding sequence alignment between DNAs to find evolutionary relationships between genes and proteins. The edit distance is firstly defined by Levenshtein in his finding of correcting binary codes \cite{Levenshtein}. Over time the edit distance is adapted toward fields and problems that require a concept of similarity as well as some algorithm to compute it.
+
+There exists a well-known dynamic programming algorithm (\ref{Edit DP}) that computes the exact distance between two instances in the general edit distance. Although it is not too efficient, it is the most flexible one as it can easily be adapted to different distance functions. Improvements to the worst-case time complexity of the dynamic programming approach have been made over the years, from the original $O(m n)$ down to $O(\min(n, m) k)$, where $n, m$ are the length of the two strings, $k$ is the edit distance \cite{Ukkonen}. The idea is to compute and store only around the diagonals of the dynamic programming table. For small $k < m^{1 / 4}$, Cole and Hariharan developed a faster algorithm that runs in $O(n(1 + \frac{k^c}{m}))$ where $c = 3, 4$ is some constant dependant on the input \cite{ColeHariharan}.
+
+Finding the edit distance over an arbitrary set of strings is computationally hard due to a result by Jiang and Li. Jiang and Li showed that approximating Longest Common Subsequence, which corresponds to exactly finding the minimum edit distance is NP-Hard by a reduction from another NP-Hard problem $\texttt{Max-Clique}$ \cite{HardLCS}. As a result, further reduction also shows that aggregation tasks such as finding the median (and consequently center) string in the edit metric are also NP-Hard \cite{MedianString}.
+
+Some recent work in the field has been on discovering a fast approximation algorithm for edit distance. The idea is to allow errors within a tolerable margin to get a better-performing algorithm. A recent breakthrough in this area is a sub-quadratic time $\tilde{O}(n^{2 - 2/7})$ algorithm that approximates the edit distance within a constant factor \cite{QuadraticEdit}. The breakthrough is then improved upon by Andoni and Nosatzki to $O(n^{1 + \epsilon})$ for any constant $\epsilon > 0$ \cite{LinearEdit}. The randomized algorithm achieves a $f(\frac{1}{\epsilon})$ factor approximation. These two breakthroughs are ground-breaking as a (strongly) sub-quadratic time algorithm has not been discovered for decades.
+
+To find insights, people have looked into other metric spaces as well such as Hamming, Jaccard, Kendall's tau, and many more. Some metric spaces are known to be computationally easy. As an example, finding the median string of size $n$ over the Hamming distance is as simple as taking a majority character over each index in $[n]$ which can be done in polynomial time (\ref{Median Hamming}). Some metric spaces on the other hand are also known to be computationally hard. As an example, finding Kendall's tau median over a set of permutations $S$ is NP-Hard even for $|S| = 4$ \cite{KendallHard}.
+
+One such metric space that is closely related to Edit metric is Ulam metric (\ref{Ulam Metric}). In Ulam metric, we have a restriction that each symbol (character) can only appear once in the string, hence they are permutations of the alphabet $\Sigma$. Traditionally, the distance in Ulam metric is defined as the minimum number of character moves needed to transform one permutation to the other. However, researchers have also looked into the more general version of Ulam metric, where Levenshtein distance is used instead (also called permutation edit distance) \cite{PermutationEdit}.
+
+There are various reasons why Ulam metric is of particular interest. The first reason is that Ulam metric captures the same core difficulties that are found in edit metric, namely the existence of misalignments between two strings (or permutations) \cite{NearOptimalUlam}. Thus it is hoped that the core ideas that are useful to prove important results in Ulam metric can also be used and extended to the Edit metric.  
+
+The other reason is that the Ulam metric also finds practical applications in real-life. A popular use case is for rank aggregation problems, such as ranking webpages, employment, college admissions, voting, etc \cite{FairRankAggregation, RankData}. As a side note, Kendall's tau is also a popular metric for rank aggregation problems. Another novel application is to design a data representation scheme for nonvolatile memory such as flash memory that can correct translocation errors \cite{MultiPermutation, FlashMemory, ChargeDropCorrection}.
+
+The \texttt{Ulam Median} (\ref{Ulam Median}) is simply the median string (\ref{Median String}) problem under the (traditional) Ulam metric. Unlike the median string problem (over Edit metric), as of the writing of this thesis, it is unknown if it is in NP-Hard or not. Despite the uncertainty of the hardness of the problem, researchers have been trying to come up with polynomial time approximation algorithms for the \texttt{Ulam Median} problem.
+
+For decades, the only known best approximation algorithm is simply a folklore algorithm that produces a 2-approximate solution under any metric space, that is outputting the best input (\ref{FolkloreMedian}). No polynomial time approximation algorithms have broken through the 2-approximate barrier until recently when Chakraborty et. al. come up with the following result in 2020 \cite{MainPaper}.
+
+\begin{theorem}
+\label{Main Algo}
+    There exists a deterministic algorithm that given an input a set of $m$ permutations $S \subseteq S_n$, computes a $(2 - \delta)$-approximate median in $O(nm^2 \log{n} + n^2m + n^3)$ time.
+\end{theorem}
+
+The $\delta$ is a very small constant $\approx 2^{-40}$ but it still breaks the 2-approximation barrier. The idea behind the work is to look into when does the folklore algorithm fails to achieve an approximation better than 2. Turns out the folklore algorithm yields a good approximation when the optimal objective value is large. Otherwise, the structure of the input permutations must be to some extent exploited. The main idea to exploit is to divide the set of inputs into two categories, those that are far from the median and those that are close, and respectively find an upper bound for both sets of inputs. 
+
+Another novel idea that is used is to analyze differently based on the number of bad symbols. A symbol is defined to be bad if it misaligns (\ref{Alignment}) in almost all of the input strings with respect to the median. In doing so the idea that the folklore algorithm finds a good approximation when objective value is large can be leveraged further.
+
+As a small result, the paper also showcased that it is indeed possible to compute an exact median when the input is of only three permutations.
+
+\begin{theorem}
+    There exists a deterministic algorithm that given an input 3 permutations $s_1, s_2, s_3 \in S_n$, computes the median in $O(n^4)$.
+\end{theorem}
+
+The main idea is to compute by Dynamic Programming an exact median string of the 3 input permutations under the restricted form of edit metric (\ref{RestrictedMetric}), where character substitutions are not allowed, and then carefully convert it into a permutation. It can be shown that if a permutation $x'$ is the median of the restricted edit metric, then it must also be the median under Ulam metric (\ref{MedianRestrictedEdit}).
+
+Let $x'$ be the restricted edit median. To carefully convert it to a permutation without reducing it's optimality, we fix some optimal alignment (\ref{Alignment}) with all of the input strings, remove all the duplicate symbols that don't maximally align, and finally add the missing symbols back by aligning with any of the strings. As a byproduct, by following the same steps, given a fixed constant $m$ denoting the number of permutations, then we can always get a 1.5-approximation of the median in $O(2^{m + 1} n^{m + 1})$.
+
+\begin{theorem}
+\label{DPApproxMedian}
+    There exists a deterministic algorithm that given an input $m$ permutations $s_1, s_2, ..., s_m \in S_n$, computes a 1.5-approximate median in $O(2^{m + 1} n^{m + 1})$.
+\end{theorem}
+
+The idea of fixing an exact optimal solution under a more "general" metric can be applied also to the center string problem (\ref{Center String}). Chakraborty et. al. came up with the following result for computing an approximate \texttt{Ulam center} (\ref{Ulam Center}) \cite{UlamCenter}.
+
+\begin{theorem}
+    There exists a deterministic algorithm that given an input a set of permutations $S \subseteq S_n$, where $|S| = m$, computes a $(\frac{3}{2} - \frac{1}{3m})$-approximate center under the Ulam metric in $n^{O(m^2 \ln m)}$ time.
+
+    As an extra result, the running time can be improved to $O\left(n^{3m} + n^{O(\frac{\ln m}{\epsilon^2})}\right)$ for any $\epsilon > 0$ by reducing the optimality approximation to $(\frac{3}{2} + \epsilon - \frac{1}{m})$-approximate center.
+\end{theorem}
+
+The main idea follows the $1.5$-approximate median for Ulam metric. The first step is to fix an optimal $n$-length center by Dynamic Programming. The second step is to carefully convert the optimal $n$-length center to a permutation without decreasing too much of the optimality.
+
+To carefully convert the optimal $n$-length center to a permutation, the duplicate symbols must be deleted in a balanced manner as a deletion will increase the distance to some $S' \subseteq S$. A reduction to a generalized closest string problem is used to produce a balanced deletion.
+
+This result is a breakthrough as there was no known below 2-approximation algorithm for the \texttt{Ulam Center} problem. The best approximation algorithm was the folklore output the best input which achieves 2-approximation (\ref{Folklore Center}).
+
+A natural extension to the median problem would be to allow to choose not only one median but $k$ medians where $k \geq 1$ is some constant. This variant is called the $k$-median problem (\ref{KMedian}). The distance between an input $s$ would be defined as the distance to the closest median among all the $k$ medians chosen. In this variant, given an input $S$ over some metric space $M$, the objective is to choose a subset $X \subseteq M$ such that $|X| = k$ and the Ulam distance between $X$ and $S$ is minimized.
+
+To extend the previous breakthrough results to support $k$ medians, a new framework is used. The result is the following theorems due to Chakraborty et. al \cite{ClusteringPermutation}.
+
+\begin{theorem}
+\label{1999Approx}
+    There exists a deterministic algorithm such that given an input $S \subseteq S_n$ where $|S| = m$, outputs a 1.999-approximate median in $O(m^5 n^3)$ time.
+\end{theorem}
+
+\begin{theorem}
+    There exists a deterministic algorithm such that given an input $S \subseteq S_n$ where $|S| = m$, outputs a 1.999-approximate $k$-median in $O(m^{O(k)} n \log n + m^5 n^3)$ time.
+\end{theorem}
+
+The main idea of this new framework is to split the input into three categories. The first two categories are borrowed from the older framework, that is when some of the inputs are already a good enough approximation, either because they are close to a large cluster or they are close to the actual optimal medians. The last case is where the main difference lies with the old framework. Instead of analyzing the bad symbols, we simply compute an approximate median for every subset of 5 input permutations and among those approximate medians, we pick the $k$ best.

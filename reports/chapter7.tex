@@ -1,0 +1,10 @@
+\chapter{Extensions and Future Work}
+
+\section{Approximation Algorithms}
+An open extension would be to see if the state-of-the-art of 1.999-approximate can be further extended to yield a better bound. Another possible way to approach this is to come up with a perhaps better and tighter analysis of the current existing algorithms. Empirical statistics in chapter 6 shows that in a lot of cases, the approximation ratio is way better than 1.999. This perhaps shows that the analysis is not the tightest yet and more can be gained from the existing algorithms.
+
+\section{Hardness Results}
+An open extension is to find the missing link to adapt the idea discussed in chapter 5 to Ulam. If the link indeed can be established, then another open problem is to find a polynomial time reduction from Ulam median with at most one repetition to original \texttt{Ulam Median}. Another noteworthy approach is to try a reduction from the \texttt{Feedback Arc Set} problem as NP-Hard result in Kendall's tau metric (which also works on permutations) is shown via reduction from \texttt{Feedback Arc Set} \cite{KendallHard}.
+
+\section{Empirical Results}
+As an extension to gain better empirical results, one can consider applying other metaheuristics for local search that are not explored in this thesis, such as Simulated Annealing and Genetic Algorithms. Another open extension is to find some other heuristics to generate the neighbours of a candidate solution. Perhaps some heuristics can be proven to converge faster to a local optimum or can be implemented more efficiently compared to the used 2-index swap heuristic.

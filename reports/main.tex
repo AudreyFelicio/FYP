@@ -1,0 +1,269 @@
+\documentclass[titlepage, a4paper, 12pt, oneside]{book}
+\usepackage{amsmath, amsthm, amssymb, amsfonts, systeme}
+\usepackage{setspace}
+\usepackage{bbm}
+\usepackage{bm}
+\usepackage{xcolor}
+%\usepackage{fancyhdr}
+\usepackage{comment}
+\usepackage[margin=1in]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{tikz-cd}
+\usepackage{pgfplots}
+\usepackage{float}
+\usepackage{datetime}
+%\usetikzlibrary{arrows}
+%\usetikzlibrary{decorations.markings}
+\usepackage{cancel}
+%\usepackage[colorlinks=true,allcolors=black,citecolor=blue]{hyperref}
+\usepackage[colorlinks=true,allcolors=blue]{hyperref}
+\usepackage{xurl}
+\usepackage{enumitem}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage[most]{tcolorbox}
+\tcbuselibrary{many}
+\usepackage{varwidth}
+\usetikzlibrary{calc}
+\usetikzlibrary{decorations.pathmorphing}
+\usepackage{csquotes}
+\usepackage{algpseudocode}
+\usepackage{algorithmicx}
+\usepackage[backend=biber,style=alphabetic,sorting=ynt]{biblatex}
+
+
+\addbibresource{references.bib}
+
+\usepackage[immediate]{silence}
+\WarningFilter[temp]{latex}{Command} % silence the warning
+\usepackage{sectsty}
+\usepackage{lmodern}
+\allsectionsfont{\sffamily}
+\DeactivateWarningFilters[temp] % So nothing unrelated gets silenced
+
+\makeatletter % disable the runtime redefinitions
+\let\SS@makeulinesect\relax
+\let\SS@makeulinepartchap\relax
+\makeatother
+
+\AtBeginEnvironment{quote}{\singlespacing\small}
+
+\makeatletter
+\title{String Clustering: Finding Edit Similarity over Large Dataset} \let\Title\@title
+\author{Audrey Felicio Anwar} \let\Author\@author
+\newdateformat{mydate}{\THEDAY \, \monthname \, \THEYEAR}
+\mydate \let\Date\@date
+\makeatother
+
+\numberwithin{equation}{section}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem*{claim}{Claim}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem*{remark}{Remark}
+\newtheorem*{hint}{Hint}
+\newtheorem*{example}{Example}
+\newtheorem*{note}{Note}
+\newtheorem*{idea}{Idea of Proof}
+
+\makeatletter
+\DeclareRobustCommand\bigop[2][1]{%
+  \mathop{\vphantom{\sum}\mathpalette\bigop@{{#1}{#2}}}\slimits@
+}
+\newcommand{\bigop@}[2]{\bigop@@#1#2}
+\newcommand{\bigop@@}[3]{%
+  \vcenter{%
+    \sbox\z@{$#1\sum$}%
+    \hbox{\resizebox{\ifx#1\displaystyle#2\fi\dimexpr\ht\z@+\dp\z@}{!}{$\m@th#3$}}%
+  }%
+}
+\makeatother
+
+% General commands
+\newcommand{\func}{\operatorname}
+\newcommand{\lcm}{\func{lcm}}
+\newcommand{\hl}[1]{\textbf{#1}}
+\newcommand{\lf}{\lfloor}
+\newcommand{\rf}{\rfloor}
+\newcommand{\f}[1]{\left\lf #1 \right\rf}
+%\renewcommand{\c}[1]{\left\lceil #1 \right\rceil}
+\renewcommand{\c}[1]{\left\langle #1 \right\rangle}
+\newcommand{\bb}[1]{\left( #1 \right)}
+\renewcommand{\sb}[1]{\left[ #1 \right]}
+\renewcommand{\ss}[1]{\left\{ #1 \right\}}
+\renewcommand{\mod}[1]{\left| #1 \right|}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\renewcommand{\P}{\mathbb{P}}
+\newcommand{\Po}{\mathcal{P}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\Zz}{\Z_{\geq 0}}
+%\renewcommand{\c}[1]{\left\langle #1 \right\rangle}
+\renewcommand{\mod}[1]{\left| #1 \right|}
+\newcommand{\norm}[1]{\left\| #1 \right\|}
+\renewcommand{\bar}[1]{\overline{#1}}
+\newcommand{\Sb}[1]{[\![ #1 ]\!]}
+
+% Formatting
+\newcommand{\eqbreak}{\phantom{{} = {}}}
+\newcommand{\impliesbreak}{\phantom{{} \implies {}}}
+\newcommand{\iffbreak}{\phantom{{} \iff {}}}
+\newcommand{\question}[1]{\textcolor{red}{(#1)}}
+\renewcommand{\cal}{\mathcal}
+\renewcommand{\frak}{\mathfrak}
+
+% Analysis/Calculus/PDE commands
+\newcommand{\del}{\partial}
+\renewcommand{\d}[1]{\, \mathrm{d} #1}
+\newcommand{\dydt}{\frac{\d{y}}{\d{t}}}
+\newcommand{\dydx}{\frac{\d{y}}{\d{x}}}
+%\newcommand{\p}[2]{\frac{\del #1}{\del #2}}
+%\newcommand{\p}{\mathbf{p}}
+\newcommand{\pd}[2]{\frac{\del #1}{\del #2}}
+\newcommand{\pp}[3]{\frac{\del^2 #1}{\del #2 \del #3}}
+\newcommand{\dd}[2]{\frac{\mathrm{d} #1}{\mathrm{d} #2}}
+\newcommand{\supp}{\func{supp}}
+
+% Algebra/LA commands
+\newcommand{\m}[1]{\begin{matrix} #1 \end{matrix}}
+\newcommand{\notunlhd}{\,\cancel{\unlhd}\,}
+\newcommand{\notlhd}{\,\cancel{\lhd}\,}
+\newcommand{\Inn}{\func{Inn}}
+\newcommand{\Aut}{\func{Aut}}
+\newcommand{\diag}{\func{diag}}
+\newcommand{\id}{\func{id}}
+\newcommand{\GL}{\func{GL}}
+\newcommand{\SL}{\func{SL}}
+\newcommand{\End}{\func{End}}
+\newcommand{\Hom}{\func{Hom}}
+\newcommand{\Tr}{\func{Tr}}
+\newcommand{\rank}{\func{rank}}
+
+\let\strokeL\L
+\DeclareRobustCommand{\L}{\ifmmode\mathcal{L}\else\strokeL\fi}
+
+\newenvironment{midproof}[1][Proof]
+  {\begin{proof}[#1]\renewcommand{\qedsymbol}{$\blacksquare$}}
+  {\end{proof}}
+
+\setlength{\parindent}{0cm}
+\setlist[enumerate,1]{label={(\arabic*)}}
+\parskip = 7pt
+\pgfplotsset{compat=1.17}
+\raggedbottom
+
+\doublespacing
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+\begin{document}
+\pagebreak
+\vspace{1cm}
+\begin{center}
+    \includegraphics[scale=0.7]{images/NUS Logo.jpg}
+\end{center}
+
+\begin{center}
+    \normalfont\bfseries\LARGE
+    \textbf{\Title}
+\end{center}
+
+\vspace{1cm}
+
+\begin{center}
+    An Honours Thesis 
+    
+    submitted in partial fulfillment of the requirements for the degree of
+    
+    B.Comp (Hons) in Computer Science
+\end{center}
+
+\vspace{1cm}
+
+\begin{center}
+    presented to
+    
+    \vspace{0.2cm}
+    the Department of Computer Science \\
+
+    School of Computing \\
+
+    National University of Singapore \\
+
+    Asst. Prof. Diptarka Chakraborty, Supervisor \\
+
+    Asst. Prof. Warut Suksompong, Evaluator
+\end{center}
+
+\vspace{1cm}
+
+\begin{center}
+    by
+    
+    \Author
+\end{center}
+
+\begin{center}
+    \Date
+\end{center}
+
+\pagebreak
+
+\input{acknowledgement}
+
+\input{abstract}
+
+\tableofcontents
+
+\pagebreak
+
+\input{chapter1}
+
+\input{chapter2}
+
+\input{chapter3}
+
+\input{chapter4}
+
+\input{chapter5}
+
+\input{chapter6}
+
+\input{chapter7}
+
+\printbibliography[heading=bibintoc,title={References}]
+
+\end{document}

@@ -1,0 +1,115 @@
+\chapter{Basic and Miscellaneous Results}
+
+This chapter aims to provide some basic results and formally prove them. These basic results are the foundations in which most progress in the field has been made, including the attempts made in the later chapters. Some miscellaneous findings that don't fit in the rest of the chapters are also provided here along with the proofs.
+
+\begin{theorem}[Proof of Theorem \ref{LCSFormula}]    
+\end{theorem}
+
+\begin{proof}
+    Consider a sequence of optimal moves $M = m_1, m_2, \cdots, m_k$ that is used to transform $x$ into $y$. Let $I = \{i_1, i_2, \cdots, i_t\}$ be the indexes of the characters that are not moved by the moves $M$. Notice that the subsequence $x[i_1]x[i_2]\cdots x[i_t]$ appears in both $x$ and $y$ since they are not moved and $x$ eventually transforms into $y$. Hence $x[i_1]x[i_2]\cdots x[i_t]$ is a common subsequence of $x$ and $y$ which implies $t \leq |LCS(x, y)|$.
+
+    Observe that $k \geq n - t$ since the rest of the characters whose index is not in $I$ must be moved at some point. We have $ul(x, y) = k \geq n - t \geq n - |LCS(x, y)|$.
+
+    Now consider the $LCS(x, y)$. For any character in $x$ that is not in $LCS(x, y)$, we can use one move operation to put that character in index $j$ where $y[j]$ equals that character. We spend $n - |LCS(x, y)|$ number of moves. After those moves are done, notice that the characters in $LCS(x, y)$ need not be moved anymore as they are already in the correct positions. Hence, $ul(x, y) \leq n - |LCS(x, y)|$. Combining, we have $ul(x, y) = n - |LCS(x, y)|$ as desired.
+\end{proof}
+
+\begin{theorem}[Folklore 2-Approximation of Metric Median]
+\label{FolkloreMedian}
+    There exists a deterministic algorithm such that given an input $S \subseteq M$ over some metric space $(M, d)$, computes a 2-approximate median of $S$ in polynomial time given that $d$ is computable in $poly(|S|)$.
+\end{theorem}
+
+\begin{proof}
+    Let $m \in M$ denote the optimal median of $S$ and $\texttt{OPT} = \sum\limits_{s \in S} d(m, s)$ be the optimal objective value. Let $s^* \in S$ denotes the input such that $d(s^*, m) \leq d(s, m)$ for any $s \in S$. By the triangle inequality, we have
+    \[\sum_{s \in S} d(s^*, s) \leq \sum_{s \in S} d(s^*, m) + d(m, s) \leq 2 \sum_{s \in S} d(m, s) = 2 \texttt{OPT}\]
+
+    Now consider the input $x \in S$ such that $\sum\limits_{s \in S} d(x, s) \leq \sum\limits_{s \in S} d(y, s)$ for any $y \in S$. Notice that we have
+
+    \[\sum_{s \in S} d(x, s) \leq \sum_{s \in S} d(s^*, s) \leq 2 \texttt{OPT}\]
+
+    Hence an input that minimizes the total distance to the other inputs is a 2-approximate median. Below is the algorithm pseudocode to find such an input:
+
+    \lstinputlisting[language=Python, caption=Best Median Input]{pseudocode/best_median_input.py}
+
+    Overall the algorithm runs in $O(|S|^2 D)$ where $D$ is the time to compute the distance function $d$, which is assumed to be computable in $poly(|S|)$. Hence, the algorithm runs in polynomial time.
+\end{proof}
+
+\begin{theorem}[Folklore 2-Approximation of Metric Center]
+\label{Folklore Center}
+    There exists a deterministic algorithm such that given an input $S \subseteq M$ over some metric space $(M, d)$, computes a 2-approximate center of $S$ in polynomial time.
+\end{theorem}
+
+\begin{proof}
+    Let $c \in M$ denote the optimal center of $S$ and $\texttt{OPT} = \max\limits_{s \in S} d(c, s)$ be the largest distance from the center $c$ to the inputs $S$. Notice that for any $x, y \in S$, we have by the triangle inequality
+    \[d(x, y) \leq d(x, c) + d(c, y)\]
+    For any input $x \in S$
+    \[\max_{y \in S} d(x, y) \leq \max_{y \in S} (d(x, c) + d(c, y)) \leq d(x, c) + \max_{y \in S} d(c, y) \leq \max_{x \in S} d(x, c) + \max_{y \in S} d(c, y)= 2 \texttt{OPT}\]
+
+    Hence any input $x \in S$ is immediately a 2-approximate center. The algorithm is to just output any input in $S$, which can be done in $O(|S|)$ which is polynomial time.
+\end{proof}
+
+\begin{theorem}[2-Approximation of Metric $k$-center]
+\label{KCenterApproximate}
+    There exists a deterministic algorithm such that given an input $S \subseteq M$ over some metric space $(M, d)$, computes a 2-approximate $k$-center of $S$ in polynomial time given that $d$ is computable in $poly(|S|)$.
+\end{theorem}
+
+\begin{proof}
+    The following pseudocode denotes the algorithm:
+
+    \lstinputlisting[language=Python, caption=Hamming Median]{pseudocode/k_center.py}    
+
+    Fix an optimal $k$-center $C^*$ and let $\texttt{OPT}$ be the optimal objective value, that is $d(s, C^*) \leq \texttt{OPT}$ for any $s \in S$. Now consider the approximate centers $C$ that are produced by the greedy algorithm. Notice that by definition, for each $s \in S$ we can always find a $c^* \in C^*$ such that $d(s, c^*) \leq \texttt{OPT}$. If for that $c^*$ there exists a $c \in C$ such that $d(c^*, c) \leq \texttt{OPT}$, then by triangle inequality:
+    \[d(s, c) \leq d(s, c^*) + d(c^*, c) \leq 2 \texttt{OPT}\]
+
+    Otherwise, because $|C^*| = |C| = k$, by pigeonhole principle there must exists some $s' \in C^*$ such that $d(s_i, s'), d(s_j, s') \leq \texttt{OPT}$ where $s_i, s_j \in C$. Without Loss of Generality assume that $s_i$ is chosen first before $s_j$ by the algorithm. Let $C'$ denote the set of medians chosen right before $s_j$ is added. By construction of the algorithm, for every $s \in S \backslash C'$, $d(s, C') \leq d(s_i, s_j)$ since $s_j$ maximizes the distance to $C'$ among everything in $S \backslash C'$. By triangle inequality again
+    \[d(s_i, s_j) \leq d(s_i, s') + d(s', s_j) = 2 \texttt{OPT}\]
+
+    Hence, the set $C$ is a 2-approximate $k$-center as desired. The algorithm runs in $O(|S| k^2 D)$ where $D$ is the time needed to compute the distance function $d$, which is assumed to be computable in $poly(|S|)$. Hence it runs in polynomial time.
+\end{proof}
+
+\begin{theorem}[Median of Restricted Edit is Median of Ulam]
+\label{MedianRestrictedEdit}
+    Let $S \subseteq S_n$ be a given set of permutations. Let $x'$ be the Restricted Edit median over $S$. If $x'$ is a permutation then it is also an Ulam median over $S$.
+\end{theorem}
+
+\begin{proof}
+    Notice that every Ulam move can be modeled with a single deletion followed by a single insertion. We observe that given two strings $x, y$, it must be the case that $2 ul(x, y) = red(x, y)$.
+
+    Let $x'$ be the Restricted Edit median that is also a permutation and let $p$ be some permutation such that it is an Ulam median. By definition, we have $\sum\limits_{s \in S} ul(x', s) \geq \sum\limits_{s \in S} ul(p, s)$. We also have $\sum\limits_{s \in S} red(x', s) \leq \sum\limits_{s \in S} red(p, s) \implies \sum\limits_{s \in S} 2 ul(x', s) \leq \sum\limits_{s \in S} 2 ul(p, s)$. Hence we have $\sum\limits_{s \in S} ul(x', s) \leq \sum\limits_{s \in S} ul(p, s)$. Concluding, we have $\sum\limits_{s \in S} ul(x', s) = \sum\limits_{s \in S} ul(p, s)$ which means that $x'$ is an Ulam median.
+\end{proof}
+
+\begin{theorem}[Median over Hamming Distance]
+\label{Median Hamming}
+    There exists a deterministic algorithm such that given an input $S$ of strings of equal length $n$ over some alphabet $\Sigma$, computes the Hamming median of $S$ in $O(n |S|)$ time.
+\end{theorem}
+
+\begin{proof}
+    Let $\texttt{OPT(X)}$ denote the optimal objective value over the set $X$. Let $S'$ be the set where all the first characters of every string in $S$ are removed. Let $f_S(c, i)$ denote the number of occurrences of the character $c$ at index $i$ in the set $S$. The Hamming median problem has the following optimal substructure:
+    \[\texttt{OPT(S)} = \min_{c \in \Sigma}\left(|S| -  f_S(c, 1) + \texttt{OPT(S')}\right)\]
+
+    By cut-and-paste argument, suppose that there exists a better solution $\texttt{OPT*(S')} < \texttt{OPT(S')}$, then by replacing $\texttt{OPT(S')}$ with $\texttt{OPT*(S')}$ we get another solution $\texttt{OPT*(S)} < \texttt{OPT(S)}$, but this is a contradiction with the optimality of $\texttt{OPT(S)}$. Hence the optimal substructure must hold. From the optimal substructure equation, we can do algebraic manipulation as such:
+
+    \[\texttt{OPT(S)} = \min_{c \in \Sigma}\left(|S| -  f_S(c, 1)\right) + \texttt{OPT(S')}\]
+    \[= \left(|S| - \max_{c \in \Sigma} f_S(c, 1)\right) + \texttt{OPT(S')}\]
+    \[= \sum_{i = 1}^n \left(|S| - \max_{c \in \Sigma} f_S(c, i)\right) \text{(By unrolling the recursion)}\]
+    \[= n|S| - \sum_{i = 1}^n \max_{c \in \Sigma} f_S(c, i)\]
+
+    Hence, to get the Hamming median, we just need to pick the majority character that occurs at every index $i \in [n]$. Below is a pseudocode that implements the algorithm:
+    
+    \lstinputlisting[language=Python, caption=Hamming Median]{pseudocode/hamming_median.py}
+
+    The algorithm runs in $O(n|S|)$ time as desired.
+\end{proof}
+
+\begin{theorem}[Folklore Dynamic Programming for Edit Distance]
+\label{Edit DP}
+    Given two strings $x, y$ of length $n, m$ respectively over some alphabet $\Sigma$, there exists a $O(m n)$ algorithm to compute the edit distance.
+\end{theorem}
+
+\begin{proof}
+    Suppose that the last character of $x$ and $y$ is the same, then $ed(x, y) = ed(x[1 : n - 1], y[1 : m - 1])$. If the last character of $x$ and $y$ are different, then $ed(x, y) = 1 + min(ed(x[1 : n - 1], y), ed(x, y[1 : m - 1])$ since we need to spend one operation to either delete the last character of $x$ or the last character of $y$. We have an optimal substructure on $ed$. We can use Dynamic Programming since there are overlapping subproblems.
+
+    Below is the pseudocode of the implementation:
+    \lstinputlisting[language=Python, caption=Edit DP]{pseudocode/edit_dp.py}
+
+    The algorithm runs in $O(m n)$ as desired.
+\end{proof}

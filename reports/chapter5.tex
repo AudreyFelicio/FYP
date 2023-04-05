@@ -1,0 +1,65 @@
+\chapter{Hardness Results}
+
+Besides coming up with better approximation algorithms as discussed in the previous chapter, it is also of great interest to determine the computational hardness of the \texttt{Ulam Median} problem. In this chapter, several attempts and approaches to finding a reduction chain to try to prove that \texttt{Ulam Median} is NP-Hard will be discussed.
+
+\section{Reduction From LCS}
+
+The main motivation for this reduction is due to existing past works that showed that the \texttt{Edit Median} problem is NP-Complete. The proof follows from the polynomial time reduction from \texttt{Max-Clique} to \texttt{LCS} by Jiang and Li and then chained together with the polynomial time reduction from \texttt{LCS} to \texttt{LCS0} and then from \texttt{LCS0} to \texttt{Edit Median} \cite{HardLCS, MedianString}. We shall start our finding by reproducing the proof that \texttt{LCS} is NP-Hard with more details as Jiang and Li didn't explicitly prove the reduction.
+
+\begin{theorem}[\texttt{LCS} is NP-Hard]
+\end{theorem}
+
+\begin{proof}
+    We prove this by a reduction from \texttt{Max-Clique} which is known to be NP-Hard \cite{MaxClique}.
+    
+    Consider an instance of $\texttt{Max-Clique}$, a graph $G = (V, E)$ where $V = \{v_1, v_2, \cdots, v_n\}$ is the set of vertices and $E$ is the set of edges. Pick any vertex $v_i$, let $v_{i_1}, v_{i_2}, \cdots, v_{i_q}$ be the neighbours of the vertex $v_i$, where $i_1 < i_2 < \cdots < i_q$. Let $p$ be the largest index such that $i_p < i$. We construct two sequences as such:
+    \[x_i = v_{i_1}v_{i_2}\cdots v_{i_p} v_i v_1 v_2 \cdots v_{i - 1} v_{i + 1} v_{i + 2} \cdots v_n\]
+    \[x'_i = v_1 v_2 \cdots v_{i - 1} v_{i + 1} \cdots v_n v_i v_{i_{p + 1}} v_{i_{p + 2}} \cdots v_{i_q}\]
+    Let $S = \{x_i, x'_i | 1 \leq i \leq n\}$ be the instance of \texttt{LCS}.
+
+    ($\rightarrow$)
+    If the graph $G$ has a clique of size $k$, then let $v_{c_1}, v_{c_2}, \cdots, v_{c_k}$ be the vertices in the clique of size $k$, where $c_1 < c_2 < \cdots < c_k$. Notice that the sequence
+    \[V = v_{c_1} v_{c_2} \cdots v_{c_k}\] 
+    is a subsequence of each sequence $s \in S$. Hence the Longest Common Subsequence of $S$ must have length of at least $k$.
+
+    ($\leftarrow$)
+    If $S$ has a common subsequence of length $k$, let the common subsequence be 
+    \[V = v_{c_1} v_{c_2} \cdots v_{c_k}\] 
+
+    Pick any vertex $v_{c_i}$ and consider any $v_{c_j}$ such that $c_j < c_i$. Now consider $x_{c_i}$, inside that string there's only 2 possible contiguous substring that it can possibly match in, that is:
+    \[S_1 = v_{c_{i_1}}v_{c_{i_2}}\cdots v_{c_{i_p}}\]
+    \[S_2 = v_1 v_2 \cdots v_{c_i - 1}\]
+    Notice that in between $S_1$ and $S_2$ in $x_{c_i}$, there is the character (vertex) $v_{c_i}$. Suppose now that $v_{c_j}$ matches in $S_2$, then consider the string $x'_{c_i}$. $v_{c_j}$ can only possibly appear before $v_{c_i}$ in $x'_{c_i}$ by construction, but by matching with $S_2$, $v_{c_j}$ appears after $v_{c_i}$ in $x_{c_i}$. Regardless of where both $v_{c_i}$ and $v_{c_j}$ are in $V$, we cannot have them both appear in $V$ as a common subsequence of everything in $S$ as they will not align with one of $x_{c_i}$ or $x'_{c_i}$. Hence it must be the case that $v_{c_j}$ matches in $S_1$. We conclude that $v_{c_j}$ must be a neighbour of $v_{c_i}$.
+
+    Using similar reasoning, for any $v_{c_j}$ such that $c_j > c_i$, we can show that it must be matched in the substring $v_{c_{i_{p + 1}}} v_{c_{i_{p + 2}}} \cdots v_{c_{i_q}}$ in $x'_{c_i}$. Hence $v_{c_j}$ must also be a neighbour of $v_{c_i}$. By repeating the argument over all vertex $v_{c_i}$, we get that $V$ forms a clique of size $k$ in $G$.
+
+    It takes $O(n \log n)$ time for each vertex $v_i$ to produce $x_i, x'_i$ as it needs to traverse its neighbour list and sort them. Overall the reduction runs in $O(n^2 \log n)$ time as we have $n$ vertices in $G$. This runs in polynomial time with respect to the encoding of $G$.
+\end{proof}
+
+As a corollary of the previous reduction, we have a special instance of \texttt{LCS} that is NP-Hard. This special instance has the property that each character appears at most twice in each input string. The high-level idea is to adapt the chain of reductions from \texttt{LCS} to \texttt{Edit Median} to conclude that \texttt{Ulam Median} over strings which allows repetition at most once for each character is NP-Hard.
+
+There are a few reasons why the reductions are hard to adapt to Ulam. The first reason is that we must ensure that the number of occurences of each character in each input strings to be the same. This constraint is needed to have a well-defined Ulam distance. Such a constraint is not needed in the case of Edit. As a corollary, we must also have that each input in Ulam must have the same length, while it is not necessary in the case of Edit.
+
+The other reason is that in Ulam if we try to extend the alphabet $\Sigma$ and add new characters into $\Sigma$, we must ensure that each character have to appear in the input strings as well. Combining both we see that the chain of reductions $\texttt{LCS} \leq_p \texttt{LCS0} \leq_p \texttt{Edit Median}$ is not adaptable (at least directly) to \texttt{Ulam Median} as the reduction makes heavy use of alphabet extension and creating shorter strings as inputs.
+
+% \section{Small Reduction on Center Permutation}
+% Due to a result by Chakraborty et. al., if \texttt{Ulam Median} is NP-Hard, then \texttt{Ulam Center} must be NP-Hard as well \cite{UlamCenter}. Another approach that we take is to try to add extra constraints to \texttt{Ulam Center} and \texttt{Ulam Median} such that we can establish a clearer relation. We will look into the following two problems:
+
+% \begin{definition}[\texttt{Special LCS}]
+%     Given $n$ strings $s_1, s_2, \cdots, s_n$ each of length $2k$ over some alphabet $\Sigma$ such that $|\Sigma| = k$ and each input strings are permutations of one another, decide whether there exists a common subsequence of length $k$ and is a permutation of $\Sigma$.
+% \end{definition}
+
+% \begin{definition}[\texttt{Special Ulam Center}]
+%     Given $n$ strings $s_1, s_2, \cdots, s_n$ each of length $2k$ over some alphabet $\Sigma$ such that $|\Sigma| = k$ and each input strings are permutations of one another, decide whether there exists a string $s$ over $\Sigma$ such that $\max\limits_{i \in [n]} ul(s_i, s) \leq k$ and for each $c \in \Sigma$, it must appear at least once in $LCS(s, s_i)$ for all $s_i$.
+% \end{definition}
+
+% \begin{theorem}
+%     $\texttt{Special LCS} \leq_p \texttt{Special Ulam Center}$
+% \end{theorem}
+
+% \begin{proof}
+%     Given the input $s_1, s_2, \cdots, s_n, \Sigma$ for \texttt{Special LCS}, simply do nothing and take it directly as the input to \texttt{Special Ulam Center}.
+    
+%     $(\rightarrow)$ 
+%     Suppose that there exists a common subsequence of length $k$ and it is a permutation of $\Sigma$. Let $l$ denote the common subsequence. Construct a string $s'$ by arbitrarily appending the missing characters in $l$ such that $|s'| = 2k$ and $s'$ is a permutation of $s_1$.
+% \end{proof}

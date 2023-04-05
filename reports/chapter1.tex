@@ -1,0 +1,141 @@
+\chapter{Notations and Preliminaries}
+
+\section{Notations}
+\label{notations}
+
+\begin{itemize}
+    \item $[n]$ denotes the set of numbers $\{1, 2, \cdots, n\}$.
+    \item $S_n$ denotes the set of all permutations over the set $[n]$.
+    \item $ed(x, y)$ denotes the edit distance between two strings $x, y$.
+    \item $ul(x, y)$ denotes the Ulam distance between two permutations $x, y$.
+    \item $red(x, y)$ denotes the restricted edit distance between two strings $x, y$.
+    \item $LCS(x, y)$ denotes the longest common subsequence between two strings (or permutations) $x, y$.
+    \item $x[a : b]$ denotes the substring from index $a$ to index $b$ of a given string $x$.
+\end{itemize}
+
+\section{Preliminaries}
+\label{preliminaries}
+\begin{definition}[Permutation]
+    A permutation of length $n$ is a set of $n$ distinct integers $\{1, 2, ..., n\}$ in any arbitrary order. As an example $\{3, 2, 1, 4\}$ is a permutation of length $4$ but $\{2, 2, 1\}$ is not a permutation since $2$ appears twice.
+\end{definition}
+
+\begin{definition}[Metric Space]
+   A metric space is an ordered pair $(M, d)$ where $M$ is a set and $d: M \times M \rightarrow \mathbb{R}$ a function such that
+   \begin{enumerate}
+      \item d(x, x) = 0
+      \item If $x \neq y$, $d(x, y) > 0$
+      \item $d(x, y) = d(y, x)$
+      \item $d(x, z) \leq d(x, y) + d(y, z)$
+   \end{enumerate}
+\end{definition}
+
+\begin{definition}[Edit Distance]
+\label{Edit Distance}
+    Given two strings $x, y$ over some alphabet $\Sigma$, the edit distance between them is the minimum number of character insertions, deletions, or substitutions needed to transform $x$ into $y$.
+\end{definition}
+
+\begin{definition}[Edit Metric]
+\label{Edit Metric}
+    A metric space identified by the ordered pair $(S, ed)$ where $S$ denotes a set of strings over some alphabet $\Sigma$ and $ed$ denotes the edit distance.
+\end{definition}
+
+\begin{definition}[Restricted Edit Distance]
+    Given two strings $x, y$ over some alphabet $\Sigma$, the restricted edit distance between them is the minimum number of character insertions or deletions needed to transform $x$ into $y$. Character substitutions are not allowed.
+\end{definition}
+
+\begin{definition}[Restricted Edit Metric]
+\label{RestrictedMetric}
+    A metric space identified by the ordered pair $(S, red)$ where $S$ denotes a set of strings over some alphabet $\Sigma$ and $red$ denotes the restricted edit distance.
+\end{definition}
+
+\begin{definition}[Ulam Distance]
+\label{Ulam Distance}
+    Given two permutations $x, y \in S_n$, the Ulam distance between them is the minimum number of character moves to transform $x$ into $y$. A character move on a permutation $p$ is defined as removing that character from $p$ and immediately inserting it back at any location in $p$. As an example $[1, 2, 3, 4] \rightarrow [1, 3, 4, 2]$ is produced by one move of the character 2.
+\end{definition}
+
+\begin{definition}[Ulam Metric]
+\label{Ulam Metric}
+    A metric space identified by the ordered pair $(S_n, ul)$.
+\end{definition}
+
+\begin{definition}[Longest Common Subsequence (\texttt{LCS})]
+    Given a set of strings $S$ over some alphabet $\Sigma$, the longest common subsequence is a string $l$ over the same alphabet $\Sigma$ such that it is a common subsequence of any $s \in S$ and it's length is maximum. 
+    
+    The decision version of this problem is that given some constant $k$, decide whether there exist a common subsequence of $S$ such that it's length is $\geq k$.
+\end{definition}
+
+\begin{theorem}
+\label{LCSFormula}
+    Given 2 permutations $x, y \in S_n$, $ul(x, y) = n - |LCS(x, y)|$.
+\end{theorem}
+
+\begin{definition}[Median of Metric Space]
+\label{Median String}
+   Given a metric space $(M, d)$ and a set of data $S \subseteq M$, the median of the dataset is defined as $m^* \in M$ such that $m^* = \underset{m \in M}{\arg \min} \left(\sum\limits_{s \in S} d(m, s)\right)$.
+\end{definition}
+
+\begin{definition}[\texttt{Edit Median}]
+\label{Edit Median}
+    Given a set $S$ of strings over some alphabet $\Sigma$, find the median of $S$ with respect to the Edit metric. The decision version is given $k$, decide whether there exists some string $s'$ over $\Sigma$ such that $\sum\limits_{s \in S} ed(s, s') \leq k$.
+\end{definition}
+
+\begin{definition}[\texttt{Ulam Median}]
+\label{Ulam Median}
+    Given a set $S \subseteq S_n$ of permutations, find the median of $S$ with respect to the Ulam metric. The decision version is given $k$, decide whether there exists some permutation $p'$ over $\Sigma$ such that $\sum\limits_{p \in S} ul(p, p') \leq k$.
+\end{definition}
+
+\begin{definition}[$k$-Median of Metric Space]
+\label{KMedian}
+    Given a metric space $(M, d)$ and a set of data $S \subseteq M$, the $k$-median of the dataset is defined as a set $X^* \subseteq M$ such that $|X^*| = k$ and $X^* = \underset{X \subseteq M, |X| = k}{\arg \min} \left(\sum\limits_{s \in S} \left(\min\limits_{x \in X} d(x, s)\right) \right)$
+\end{definition}
+
+\begin{definition}[Center of Metric Space]
+\label{Center String}
+    Given a metric space $(M, d)$ and a set of data $S \subseteq M$, the center of the dataset is defined as $m^* \in M$ such that $m^* = \underset{m \in M}{\arg \min} \left(\max\limits_{s \in S} d(m, s)\right)$.
+\end{definition}
+
+\begin{definition}[\texttt{Ulam Center}]
+\label{Ulam Center}
+    Given a set $S \subseteq S_n$  of permutations, find the center of $S$ with respect to the Ulam metric. The decision version is given $k$, decide whether there exists some permutation $p'$ over $\Sigma$ such that $\max\limits_{p \in S} ul(p, p') \leq k$.
+\end{definition}
+
+\begin{definition}[$k$-Center of Metric Space]
+\label{KCenter}
+    Given a metric space $(M, d)$ and a set of data $S \subseteq M$, the $k$-center of the dataset is defined as a set $X^* \subseteq M$ such that $|X^*| = k$ and $X^* = \underset{X \subseteq M, |X| = k}{\arg \min} \left(\max\limits_{s \in S} \left(\min\limits_{x \in X} d(x, s)\right) \right)$
+\end{definition}
+
+\begin{definition}[Alignment]
+\label{Alignment}
+   Given two strings (permutations) $x$ and $y$ of lengths $n_1$ and $n_2$ respectively, an alignment $g$ is a function from
+   from $[n_1]$ to $[n_2] \cup \{*\}$ which satisfies:
+   \begin{itemize}
+      \item $\forall i \in [n_1]$, if $g(i) \neq *$, then $x(i) = y(g(i))$
+      \item For any two $i \neq j \in [n_1]$ such that $g(i) \neq *$ and $g(j) \neq *$, if $i > j$ then $g(i) > g(j)$ 
+   \end{itemize}
+
+   We say that $g$ aligns a character $x(i)$ with some character $y(j)$ iff $j = g(i)$.
+   An optimal alignment between $x, y$ would be the $LCS(x, y)$.
+\end{definition}
+
+\begin{definition}[NP]
+    A decision problem $D$ is in NP if and only if there exists some certificate $C$ of polynomial size with respect to the input encoding of $D$ and there exists some verifier algorithm $A$ that decides whether $C$ is a YES-instance of $D$ in polynomial time with respect to the input encoding of $D$.
+\end{definition}
+
+\begin{definition}[NP-Hard]
+    A decision problem $D$ is NP-Hard if and only if all the problems $L \in$ NP can be reduced in polynomial time to $D$.
+\end{definition}
+
+\begin{definition}[NP-Complete]
+    A decision problem $D$ is NP-Complete if and only if it is in both NP and NP-Hard.
+\end{definition}
+
+\begin{definition}[\texttt{Max-Clique}]
+    Given a graph $G = (V, E)$ where $V$ is the set of vertices and $E$ is the set of edges, determine the largest clique $C \subseteq V$. A clique of size $k$ is defined to be a complete graph on $k$ vertices.
+
+    The decision version of this problem is that given $k$, determine if there exists a clique of size $\geq k$ in $G$.
+\end{definition}
+
+\begin{definition}[\texttt{LCS0}]
+    Given a positive constant $k$ and $n$ strings $w_1, w_2, \cdots, w_n$ each of length $2k$ over some alphabet $\Sigma$, decide whether there exists a string $w$ such that $|w| \geq k$ and $w$ is a subsequence of each $w_i$.
+\end{definition}
+

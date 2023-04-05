@@ -1,0 +1,117 @@
+\chapter{Implementation and Empirical Results}
+
+In this chapter, we shall discuss various strategies for implementing some of the algorithms seen in earlier chapters. To further bridge the gap between theory and practice, some heuristic algorithms such as local search are also implemented. Finally, we try to see the tightness of the theoretical results by benchmarking with custom datasets.
+
+All the source codes along with the information on how to build and run can be found in the following public repository: \url{https://github.com/AudreyFelicio/FYP}
+
+\section{Algorithm Implementation}
+The algorithms implemented is strictly to solve the \texttt{Ulam Median} problem. The input is a set of permutations $S \subseteq S_n$ where $|S| = m$. All the algorithms are implemented using \texttt{C++} as it is a systems language which means that it is good for tasks that require fast computations and low-level optimizations.
+
+\subsection{Bruteforce Solver (\texttt{Optimal})}
+Bruteforce solver for the optimal permutation under Ulam metric which runs in $O(n \log n * n! * m)$ time. The solver simply iterates over all $n!$ possible permutations and outputs two lines. The first one is the optimal objective value and the second one the optimal permutation that minimizes the total Ulam distance to all $m$ inputs. It terminates within a reasonable time ($\leq$ 2 hour) for $n \leq 10$ and $m \leq 5000$. 
+
+To leverage on modern CPU architectures with multicore processors and simultaneous multi-threading, the Bruteforce Solver is further optimized using multi-threading to have a factor of $C$ speedup, where $C$ is the number of logical cores available in the running machine. The multi-threading strategy is to spawn $n$ threads and each thread will iterate through exactly $(n - 1)!$ different permutations. Finally all the result from the threads will be aggregated back to the $\texttt{main()}$ method and the optimal median will be chosen from the local median of the threads. A Master-Worker pattern is used for this solver.
+
+To allow for novel and clean implementation, the $i$-th thread spawned will be responsible to iterate through all the permutations from $[i, 1, 2, \cdots, i - 1, i + 1, \cdots, n]$ to $[i, n, n - 1, \cdots, i + 1, i - 1, \cdots, 1]$. The implementation can be found in the file $\texttt{bruteforce.cpp}$.
+
+\subsection{Best From Input (\texttt{BestInput})}
+It is a direct implementation of the pseudocode shown in \ref{FolkloreMedian} which runs in $O(m^2 n \log n)$ time. The factor $m^2$ is due to iterating over all pairs of input permutations and $n \log n$ is due to computing the Ulam distance between each pair of input permutation. The algorithm outputs 2 lines, the first one containing the objective value of the permutation and the second line containing the best input permutation itself. The implementation can be found in the files $\texttt{best\textunderscore from\textunderscore input.cpp, best\textunderscore from\textunderscore input.hpp}$.
+
+\subsection{Theorem \ref{Main Algo} (\texttt{RelativeOrder})}
+It is a direct implementation of the pseudocode shown in \cite{MainPaper}. The implementation runs in $O(nm^2 \log n + n^2m + n^4)$. The main difference with the pseudocode is that to remove a cycle of minimum length, a BFS based implementation that runs in $O(n^3)$ is used instead of a Floyd-Warshall based approach. The idea behind the BFS based approach is that by doing a single BFS from a vertex $v$, one can find the cycle of minimum length that contains $v$. This is because if we remove an edge $(u, v)$ in some minimum length cycle $C$, then the path that remains from breaking the cycle must be a shortest path from $u$ to $v$ and we are able to find it using BFS since the graph is unweighted. We simply run BFS for every vertex $v$ in the graph to find the global minimum cycle.
+
+The algorithm outputs two lines, the first one indicating the total distance of the output permutation to the input permutations and the second one indicating the approximate median permutation produced. The implementation can be found in the files \texttt{relative\textunderscore order.cpp, relative\textunderscore order.hpp}.
+
+\subsection{Theorem \ref{1999Approx} (\texttt{ApproxMedian})}
+It is a direct implementation of the pseudocode shown in \cite{ClusteringPermutation}, more specifically we implement the \texttt{ApproxMedian} algorithm. The implemnetation runs in $O(m^5 n^4)$ time. The minimum length cycle removal procedure uses the same BFS idea as the previous \texttt{RelativeOrder} algorithm.
+
+The algorithm outputs two lines, the first one indicating the total distance of the output permutation to the input permutations and the second one indicating the approximate median permutation produced. The implementation can be found in the files \texttt{approx\textunderscore median.cpp, approx\textunderscore median.hpp}.
+
+\section{Local Search}
+Some local search strategies are also implemented as a possible way to provide a better approximation algorithm. The state-of-the-art local search based approach has an approximation ratio of $(2.836 + \epsilon)$ for solving the $k$-median problem over any metric space \cite{LocalSearch}. We give a better approximation local search for solving the $\texttt{Ulam median}$ problem.
+
+\begin{theorem}
+\label{2ApproxLocal}
+    There exists a local search algorithm that given an input $S \subseteq S_n$, outputs a 2-approximate median over the Ulam metric.
+\end{theorem}
+
+\begin{proof}
+    The idea is to simply start the local search from a 2-approximate permutation. This is possible by running the algorithm $\texttt{BestInput}$ to produce the initial candidate solution for the local search. In the end, we take the best between the initial candidate solution and the final candidate solution after the local search algorithm has been stopped. This yields a 2-approximate median.
+\end{proof}
+
+We give three implementations of Theorem \ref{2ApproxLocal} each using a different metaheuristic. For generating the neighbors of a candidate solution, a 2-index swap heuristic is used for all of the implementations. More formally, we define 2 permutations $p, q$ as neighbors if they differ in exactly two positions. A permutation has exactly $\frac{n(n - 1)}{2}$ neighbors under this definition. The idea of a 2-index swap is borrowed from the 2-exchange neighbourhood of the \texttt{Travelling Salesman Problem}.
+
+To not waste computation resources and to leverage on multicore and multithreaded architectures, each implementation runs in parallel $C$ number of local searches where $C$ is the number of logical cores. At least one of those local searches has \texttt{BestInput} as the initial candidate hence the 2-approximation is preserved. This is one of the most powerful aspect of local search as it can easily be run in parallel since the tasks are independent of one another.
+
+\subsection{\texttt{Gradient Descent}}
+This is an implementation of the naive gradient descent heuristic. This variant of local search simply takes in the neighbor that decreases the objective value the most as the new candidate solution. The process continues until the time limit is up or a local optimum is hit. The implementation can be found in the file \texttt{naive\textunderscore local\textunderscore search.cpp}.
+
+\subsection{\texttt{Tabu Search}}
+This implementation uses the tabu search metaheuristic which high-level idea is produced in the pseudocode below:
+
+\lstinputlisting[language=Python, caption=Tabu Search]{pseudocode/tabu_search.py}
+
+We define a neighbour as tabu if it is in the tabu table. Essentially if a neighbour is tabu, then we are not allowed to choose that neighbour as the next candidate solution. Each banned neighbour is only kept in the tabu table for a bounded amount of time where a single unit of time is defined as the number of outer while loop iterations it has persisted. The time is determined by a constant called Tabu Tenure. In this implementation, we use a fixed Tabu Tenure value and the time each entry in the tabu table is kept is equal to the Tabu Tenure value. The probability 1 - P of accepting the improving candidate is called the acceptance probability.
+
+By banning recent moves and accepting better neighbours randomly, the local search can reliably escape from a local optimum. The implementation can be found in the file \texttt{tabu\textunderscore search.cpp}.
+
+\subsection{\texttt{Iterated Local Search}}
+This implementation uses the iterated local search metaheuristic which high-level idea is produced in the pseudocode below:
+
+\lstinputlisting[language=Python, caption=Iterated Local Search]{pseudocode/iterated_local_search.py}
+
+For the subsidiary local search, the simple \texttt{Gradient Descent} strategy is used. For perturbation strategy, we implemented 2 random swaps where each swap is a random 2-index swap. This perturbation strategy is to model the 4-exchange perturbation (double bridge move) found in highly successful local search for \texttt{Travelling Salesman problem}.
+
+The main idea for the perturbation is to make some changes such that it is hard for the subsidiary local search to revert it. This corresponds to "jumping" to a far away candidate solution, which is a good move if we are stuck in a local optimum. The subsidiary local search done next is to hopefully guide the local search to another better local optimum. The implementation can be found in the file \texttt{iterated\textunderscore local\textunderscore search.cpp}.
+
+\section{Benchmarks}
+
+\subsection{Data and Results}
+
+We give some empirical results of running the non local search implementations and compare them to the optimal objective value. The actual datasets can be found in \texttt{datas} folder. Each dataset has the file name \texttt{n\textunderscore m.txt} where $n$ is the length of each permutation and $m$ is the number of permutations. The actual optimal median if it can be found within reasonable time is provided inside the \texttt{expected} folder with the same file name.
+
+\begin{center}
+\begin{tabular}{||c | c | c | c | c||} 
+ \hline
+ Constraints & \texttt{Optimal} & \texttt{BestInput} & \texttt{RelativeOrder} & \texttt{ApproxMedian} \\ [0.5ex]
+
+ \hline\hline
+ $n = 3, m = 6$ & 6 & 6 & 6 & 6 \\ 
+ \hline
+ $n = 5, m = 30$ & 57 & 59 & 59 & 57 \\
+ \hline
+ $n = 10, m = 10$ & 43 & 49 & 49 & 49 \\
+ \hline
+ $n = 10, m = 30$ & 147 & 157 & 157 & 157 \\
+ \hline
+ $n = 12, m = 10$ & 56 & 61 & 61 & 61 \\ [1ex] 
+ \hline
+\end{tabular}
+\end{center}
+
+To benchmark local search implementations, we compare their outputs to the \texttt{BestInput} instead of \texttt{Optimal} since their input is order of magnitudes bigger which \texttt{Optimal} cannot compute within a reasonable amount of time. Each local search has a maximal time limit of 1 minute. The tabu tenure = 7 and acceptance probability = 0.7 for \texttt{Tabu Search}.
+
+\begin{center}
+\begin{tabular}{||c | c | c | c | c||} 
+ \hline
+ Constraints & \texttt{BestInput} & \texttt{Gradient Descent} & \texttt{Tabu} & \texttt{Iterated} \\ [0.5ex]
+
+ \hline\hline
+ $n = 10, m = 100$ & 540 & 528 & 540 & 526 \\ 
+ \hline
+ $n = 10, m = 1000$ & 5579 & 5549 & 5548 & 5535 \\
+ \hline
+ $n = 15, m = 100$ & 911 & 884 & 885 & 878 \\
+ \hline
+ $n = 15, m = 1000$ & 9328 & 9260 & 9229 & 9217 \\
+ \hline
+ $n = 50, m = 100$ & 3799 & 3700 & 3699 & 3686 \\ [1ex] 
+ \hline
+\end{tabular}
+\end{center}
+
+\subsection{Commentary}
+
+Since all the inputs are randomly generated, the results for the non local search are expected. It is well known that the expected Longest Increasing Subsequence for a randomly generated permutation of length $n$ is $O(\sqrt{n})$. This means that the distance between the median and an input permutation is expected to be around $\approx n - \sqrt{n}$. \texttt{BestInput} indeed provides a very good approximation when the objective value is very large and since the rest of the algorithm (besides \texttt{Optimal}) makes use of \texttt{BestInput}, the result is dominated by it. This verifies the result of the Chakraborty et. al. \cite{MainPaper}.
+
+For the local search benchmarks, turns out that \texttt{Tabu Search} didn't perform as well as initially projected. It still lacks behind sometimes compared to the naive \texttt{Gradient Descent}. Perhaps more parameter tuning needs to be done as the performance heavily relies on a good tabu tenure constant and acceptance probability. On the other hand, as expected \texttt{Iterated Local Search} has the best results. It should have the best mechanism of escaping local optimums and hence it can jump around the state space and find better and better local optimums. Sometimes it even stumbled across global optimum in the case when $n = 10$.

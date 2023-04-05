@@ -1,0 +1,33 @@
+\chapter{Approximation Algorithms}
+
+In this chapter, we discuss findings that can improve the approximation algorithms that we have seen in chapter 2. For context, the problem that we are considering is when there are exactly four input permutations each of length $n$ and we want to find the Ulam median over those input permutations. Direct application of \cite{MainPaper} and Theorem \ref{DPApproxMedian} gives a $\frac{3}{2} - \frac{1}{8} = \frac{11}{8}$-approximate median in $O(n^5)$ time.
+
+Theorem \ref{DPApproxMedian} makes use of a dynamic programming subroutine to compute a median over the Restricted Edit Metric where only character deletions and substitutions are allowed. The median is then carefully adjusted to be a permutation by removing duplicate characters and adding them back in a balanced manner such that they do not increase the distance by much. We shall try to add restrictions to the dynamic programming subroutine in hopes of getting a better approximation ratio.
+
+\section{Limiting the Number of Duplicate Characters}
+One interesting assumption that can be made is to limit the number of duplicate characters in the result of the dynamic programming subroutine.
+We make the assumption that we can find some black-box algorithm that outputs a restricted edit median with $\geq 1 - \epsilon n$ distinct characters. In this case, the number of duplicate characters to be deleted in other strings is $C \leq \epsilon n$.
+
+This idea didn't work well because in the analysis, the bulk of the approximation comes from the total amount of removals as a whole over all the input strings and not between only two strings or characters. The restriction cares about the number of removals at a per-character level instead of on a whole-input level. Following the same analysis in \cite{MainPaper} we are only replacing $C$ with $\epsilon n$ at best and this does not yield any interesting implication or better approximation bound.
+
+\section{Removing the N Length Restriction}
+Another interesting restriction is to allow the dynamic programming subroutine to produce a restricted edit median of length $< n$. Assume that we modify the subroutine such that it doesn't have to produce a string of length $n$. In this case we have the following property:
+
+\begin{lemma}
+   For every character $c$ in the restricted edit median $x'$, it must be aligned with $\geq \frac{m}{2}$ of the input permutations, where $m$ is the number of input permutations.
+\end{lemma}
+
+\begin{proof}
+   Suppose that $c$ is aligned in exactly $k$ of all the inputs. Then for the rest of the $m - k$ permutations, we need to move $c$ to the correct position such that it becomes aligned with $x'$. Each move operation translates to one deletion and one insertion. In this case, we will pay a total cost of $2(m - k)$.
+
+   If $c$ doesn't appear at all in $x'$, then we have to pay one deletion for each of the $m$ permutations to delete $c$ in them. Hence in this case we will pay a total cost of $m$. Since the dynamic programming subroutine chooses to include $c$ in $x'$, we must have
+   \[2(m - k) \leq m \implies k \geq \frac{m}{2}\]
+\end{proof}
+
+As a corollary, when $n$ is odd, $x'$ should not have duplicate symbols, and when $n$ is even, $x'$ should have at most one duplicate for each symbol. This is because each duplicate will be aligned in $\leq \frac{m}{2}$ input permutations.
+
+Let $x'$ be the modified dynamic programming output and $y'$ be the original dynamic programming output. We have
+\[\sum_{i \in [m]} red(x', x_i) \leq \sum_{i \in [m]} red(y', x_i)\]
+where $x_1, x_2, \cdots, x_m$ are the input permutations.
+
+The hard part is that adding the missing symbols back to $x'$ and making sure that it doesn't exceed too much compared to $\sum\limits_{i \in [m]} red(y', x_i)$. No good strategies on how to further relate the two have been found.
