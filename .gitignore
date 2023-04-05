@@ -1,2 +1,13 @@
 build/*
 .vscode/*
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+*.bcf
+*.run.xml
