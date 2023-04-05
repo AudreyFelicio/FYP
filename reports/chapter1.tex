@@ -58,6 +58,14 @@
     A metric space identified by the ordered pair $(S_n, ul)$.
 \end{definition}
 
+\begin{definition}[Hamming Distance]
+    Given two strings $x, y$ of equal length. The Hamming distance between them is the number of indexes $i$ such that $x[i] \neq y[i]$.
+\end{definition}
+
+\begin{definition}[Hamming Metric]
+    A metric space identified by the ordered pair $(S, d)$ where $S$ denotes a set of strings of the same length over some alphabet $\Sigma$ and $d$ denotes the Hamming distance.
+\end{definition}
+
 \begin{definition}[Longest Common Subsequence (\texttt{LCS})]
     Given a set of strings $S$ over some alphabet $\Sigma$, the longest common subsequence is a string $l$ over the same alphabet $\Sigma$ such that it is a common subsequence of any $s \in S$ and it's length is maximum. 
     
@@ -82,6 +90,11 @@
 \begin{definition}[\texttt{Ulam Median}]
 \label{Ulam Median}
     Given a set $S \subseteq S_n$ of permutations, find the median of $S$ with respect to the Ulam metric. The decision version is given $k$, decide whether there exists some permutation $p'$ over $\Sigma$ such that $\sum\limits_{p \in S} ul(p, p') \leq k$.
+\end{definition}
+
+\begin{definition}[\texttt{Hamming Median}]
+\label{HammingMedian}
+    Given a set $S$ of strings of the same length over some alphabet $\Sigma$, find the median of $S$ with respect to the Hamming metric. The decision version is given $k$, decide whether there exists some string $s'$ over $\Sigma$ such that $\sum\limits_{s \in S} d(s, s') \leq k$, where $d$ is the Hamming distance.
 \end{definition}
 
 \begin{definition}[$k$-Median of Metric Space]

@@ -55,7 +55,7 @@ This chapter aims to provide some basic results and formally prove them. These b
 \begin{proof}
     The following pseudocode denotes the algorithm:
 
-    \lstinputlisting[language=Python, caption=Hamming Median]{pseudocode/k_center.py}    
+    \lstinputlisting[language=Python, caption=Approximate K-Center]{pseudocode/k_center.py}    
 
     Fix an optimal $k$-center $C^*$ and let $\texttt{OPT}$ be the optimal objective value, that is $d(s, C^*) \leq \texttt{OPT}$ for any $s \in S$. Now consider the approximate centers $C$ that are produced by the greedy algorithm. Notice that by definition, for each $s \in S$ we can always find a $c^* \in C^*$ such that $d(s, c^*) \leq \texttt{OPT}$. If for that $c^*$ there exists a $c \in C$ such that $d(c^*, c) \leq \texttt{OPT}$, then by triangle inequality:
     \[d(s, c) \leq d(s, c^*) + d(c^*, c) \leq 2 \texttt{OPT}\]
@@ -77,9 +77,9 @@ This chapter aims to provide some basic results and formally prove them. These b
     Let $x'$ be the Restricted Edit median that is also a permutation and let $p$ be some permutation such that it is an Ulam median. By definition, we have $\sum\limits_{s \in S} ul(x', s) \geq \sum\limits_{s \in S} ul(p, s)$. We also have $\sum\limits_{s \in S} red(x', s) \leq \sum\limits_{s \in S} red(p, s) \implies \sum\limits_{s \in S} 2 ul(x', s) \leq \sum\limits_{s \in S} 2 ul(p, s)$. Hence we have $\sum\limits_{s \in S} ul(x', s) \leq \sum\limits_{s \in S} ul(p, s)$. Concluding, we have $\sum\limits_{s \in S} ul(x', s) = \sum\limits_{s \in S} ul(p, s)$ which means that $x'$ is an Ulam median.
 \end{proof}
 
-\begin{theorem}[Median over Hamming Distance]
+\begin{theorem}[Median over Hamming Metric]
 \label{Median Hamming}
-    There exists a deterministic algorithm such that given an input $S$ of strings of equal length $n$ over some alphabet $\Sigma$, computes the Hamming median of $S$ in $O(n |S|)$ time.
+    There exists a deterministic algorithm such that given an input $S$ of strings of equal length $n$ over some alphabet $\Sigma$, computes the \texttt{Hamming Median} (\ref{HammingMedian}) of $S$ in $O(n |S|)$ time.
 \end{theorem}
 
 \begin{proof}
